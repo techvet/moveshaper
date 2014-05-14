@@ -1,0 +1,58 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "title";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #shape {
+        width: 100px;
+        height: 100px;
+        background-color: blue;
+        cursor: move; 
+    }
+
+    #shape2 {
+        width: 100px;
+        height: 100px;
+        background-color: green;
+        cursor: move; 
+    }
+</style>
+<script src="~/Scripts/jquery-ui-1.10.4.min.js"></script>
+<script src="~/Scripts/jquery.ui.touch-punch.min.js"></script>
+<script src="~/Scripts/jquery.signalR-2.0.3.js"></script>
+<script src="~/signalr/hubs"></script>
+<script>
+    $(function() {
+        var hub = $.connection.moveShapeHub,
+            $shape = $('#shape'),
+            $shape2 = $('#shape2');
+
+        hub.client.ShapeMoved = function(x, y) {
+            $shape.css({ left: x, top: y });
+        };
+        
+        hub.client.ShapeMoved2 = function (x, y) {
+            $shape2.css({ left: x, top: y });
+        };
+
+        $.connection.hub.logging = true;
+        $.connection.hub.start().done(function() {
+            $shape.draggable({
+                drag: function() {
+                    hub.server.moveShape(this.offsetLeft, this.offsetTop || 0);
+                }
+            });
+            
+            $shape2.draggable({
+                drag: function () {
+                    hub.server.moveShape2(this.offsetLeft, this.offsetTop || 0);
+                }
+            });
+        });
+    })
+</script>
+<h2>SignalR Move Shapes</h2>
+<div id="shape"></div>
+<div id="shape2"></div>
